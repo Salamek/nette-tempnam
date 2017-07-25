@@ -1,5 +1,5 @@
 {
-  "name": "salamek/nette-tempname",
+  "name": "salamek/nette-tempnam",
   "type": "library",
   "description": "This is a simple tempnam extension for Nette Framework",
   "keywords": [
