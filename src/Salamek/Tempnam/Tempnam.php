@@ -66,17 +66,15 @@ class Tempnam extends Object
      */
     private function joinPaths($path, $path2)
     {
-        if (!Strings::endsWith($path, '/'))
-        {
-            $path = $path.'/';
+        if (!Strings::endsWith($path, '/')) {
+            $path = $path . '/';
         }
 
-        if (Strings::startsWith($path2, '/'))
-        {
+        if (Strings::startsWith($path2, '/')) {
             $path2 = ltrim($path2, '/');
         }
 
-        return $path.$path2;
+        return $path . $path2;
     }
 
     /**
@@ -85,9 +83,9 @@ class Tempnam extends Object
      */
     private function generateKey($key)
     {
-        return $this->namespace.md5(is_scalar($key) ? (string) $key : serialize($key));
+        return $this->namespace . md5(is_scalar($key) ? (string)$key : serialize($key));
     }
-    
+
     /**
      * @param $filename
      * @return string
@@ -131,10 +129,8 @@ class Tempnam extends Object
         $keyGen = $this->generateKey($key);
         $updateDate = $this->cache->load($keyGen);
 
-        if ($updateDate === null || $updateDate != $updatedAt)
-        {
-            if ($updateDate)
-            {
+        if ($updateDate === null || $updateDate != $updatedAt) {
+            if ($updateDate) {
                 $this->remove($key);
             }
             return null;
@@ -164,16 +160,15 @@ class Tempnam extends Object
      */
     private function clean()
     {
-        foreach (Finder::find($this->namespace.'*')->from($this->tempDir)->childFirst() as $entry) {
-            $path = (string) $entry;
+        foreach (Finder::find($this->namespace . '*')->from($this->tempDir)->childFirst() as $entry) {
+            $path = (string)$entry;
             if ($entry->isDir()) {
                 //We dont use dirs, ignore
                 continue;
             }
 
             $updateDate = $this->cache->load($entry->getFilename());
-            if ($updateDate === null)
-            {
+            if ($updateDate === null) {
                 @unlink($path);
             }
         }
