@@ -4,7 +4,9 @@ namespace Salamek\Tempnam;
 
 use Nette\Caching\Cache;
 use Nette\Caching\IStorage;
+use Nette\DirectoryNotFoundException;
 use Nette\Object;
+use Nette\Utils\Finder;
 use Nette\Utils\Strings;
 
 /**
@@ -13,8 +15,16 @@ use Nette\Utils\Strings;
  */
 class Tempnam extends Object
 {
+    /** @var float  probability that the clean() routine is started */
+    public static $gcProbability = 0.001;
+
     /** @var string */
     private $tempDir;
+
+    /**
+     * @var string
+     */
+    private $namespace;
 
     /** @var Cache */
     private $cache;
@@ -22,12 +32,23 @@ class Tempnam extends Object
     /**
      * Tempnam constructor.
      * @param $tempDir
+     * @param string $namespace
      * @param IStorage $storage
      */
-    public function __construct($tempDir, IStorage $storage)
+    public function __construct($tempDir, $namespace = '_', IStorage $storage)
     {
+        if (!is_dir($tempDir)) {
+            throw new DirectoryNotFoundException(sprintf('Directory %s not found.', $tempDir));
+        }
+
         $this->tempDir = $tempDir;
-        $this->cache = new Cache($storage, __CLASS__);
+
+        $this->namespace = $namespace;
+        $this->cache = new Cache($storage, strtr(__CLASS__, ['\\' => '.']));
+
+        if (mt_rand() / mt_getrandmax() < static::$gcProbability) {
+            $this->clean();
+        }
     }
 
     /**
@@ -58,6 +79,15 @@ class Tempnam extends Object
         return $path.$path2;
     }
 
+    /**
+     * @param $key
+     * @return mixed
+     */
+    private function generateKey($key)
+    {
+        return $this->namespace.md5(is_scalar($key) ? (string) $key : serialize($key));
+    }
+    
     /**
      * @param $filename
      * @return string
@@ -90,19 +120,34 @@ class Tempnam extends Object
 
     /**
      * @param $key
+     */
+    public function remove($key)
+    {
+        $keyGen = $this->generateKey($key);
+        $this->cache->remove($keyGen);
+        @unlink($this->getFilePath($keyGen));
+    }
+
+    /**
+     * @param $key
      * @param \DateTimeInterface|null $updatedAt
      * @return null|string
      */
     public function load($key, \DateTimeInterface $updatedAt = null)
     {
-        $updateDate = $this->cache->load($key);
+        $keyGen = $this->generateKey($key);
+        $updateDate = $this->cache->load($keyGen);
 
         if ($updateDate === null || $updateDate != $updatedAt)
         {
+            if ($updateDate)
+            {
+                $this->remove($key);
+            }
             return null;
         }
 
-        return $this->getFilePath($key);
+        return $this->getFilePath($keyGen);
     }
 
     /**
@@ -113,8 +158,31 @@ class Tempnam extends Object
      */
     public function save($key, $data, \DateTimeInterface $updatedAt = null)
     {
-        $path = $this->putFile($key, $data);
-        $this->cache->save($key, $updatedAt);
+        $keyGen = $this->generateKey($key);
+        $path = $this->putFile($keyGen, $data);
+        $this->cache->save($keyGen, $updatedAt);
         return $path;
+    }
+
+    /**
+     * @return void
+     */
+    public function clean()
+    {
+        foreach (Finder::find($this->namespace.'*')->from($this->tempDir)->childFirst() as $entry) {
+            $path = (string) $entry;
+            if ($entry->isDir()) {
+                //We dont use dirs, ignore
+                continue;
+            }
+
+            $updateDate = $this->cache->load($entry->getFilename());
+            if ($updateDate === null)
+            {
+                @unlink($path);
+            }
+        }
+
+        return;
     }
 }

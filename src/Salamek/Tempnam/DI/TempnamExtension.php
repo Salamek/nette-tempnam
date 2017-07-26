@@ -13,7 +13,7 @@ use Nette\DI\Configurator;
 class TempnamExtension extends Nette\DI\CompilerExtension
 {
     public $defaults = [
-        'tempDir' => '%tempDir%'
+        'tempDir' => '%tempDir%/tempnam'
     ];
 
 
@@ -22,6 +22,7 @@ class TempnamExtension extends Nette\DI\CompilerExtension
         $config = $this->getConfig($this->defaults);
         $builder = $this->getContainerBuilder();
 
+        @mkdir($config['tempDir']); // @ - directory may exists
 
         $builder->addDefinition($this->prefix('tempnam'))
             ->setClass('Salamek\Tempnam\Tempnam', [$config['tempDir']]);
