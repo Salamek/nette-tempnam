@@ -12,15 +12,19 @@ use Nette\DI\Configurator;
  */
 class TempnamExtension extends Nette\DI\CompilerExtension
 {
+    public $defaults = [
+        'tempDir' => '%tempDir%'
+    ];
+
 
     public function loadConfiguration()
     {
-        $config = $this->getConfig();
+        $config = $this->getConfig($this->defaults);
         $builder = $this->getContainerBuilder();
 
 
         $builder->addDefinition($this->prefix('tempnam'))
-            ->setClass('Salamek\Tempnam\Tempnam', ['%tempDir%/']);
+            ->setClass('Salamek\Tempnam\Tempnam', [$config['tempDir']]);
     }
 
     /**
