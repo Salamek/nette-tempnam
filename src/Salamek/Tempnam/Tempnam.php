@@ -92,7 +92,7 @@ class Tempnam extends Object
      * @param $filename
      * @return string
      */
-    public function getFilePath($filename)
+    private function getFilePath($filename)
     {
         return $this->joinPaths($this->tempDir, $filename);
     }
@@ -102,7 +102,7 @@ class Tempnam extends Object
      * @param $data
      * @return string
      */
-    public function putFile($filename, $data)
+    private function putFile($filename, $data)
     {
         $path = $this->getFilePath($filename);
         file_put_contents($path, $data);
@@ -110,16 +110,8 @@ class Tempnam extends Object
     }
 
     /**
-     * @param $filename
-     * @return mixed
-     */
-    public function getFile($filename)
-    {
-        return file_get_contents($this->getFilePath($filename));
-    }
-
-    /**
-     * @param $key
+     * Removes tempnam file by its key
+     * @param $key string tempnam key
      */
     public function remove($key)
     {
@@ -129,9 +121,10 @@ class Tempnam extends Object
     }
 
     /**
-     * @param $key
-     * @param \DateTimeInterface|null $updatedAt
-     * @return null|string
+     * Loads tempnam file path
+     * @param $key string tempnam key
+     * @param \DateTimeInterface|null $updatedAt When data was last updated
+     * @return null|string path to tempnam
      */
     public function load($key, \DateTimeInterface $updatedAt = null)
     {
@@ -151,10 +144,11 @@ class Tempnam extends Object
     }
 
     /**
-     * @param $key
-     * @param $data
-     * @param \DateTimeInterface|null $updatedAt
-     * @return string
+     * Saves tempnam file and returns its path
+     * @param $key string tempnam key
+     * @param $data string content of file
+     * @param \DateTimeInterface|null $updatedAt When data was last updated
+     * @return string path to tempnam
      */
     public function save($key, $data, \DateTimeInterface $updatedAt = null)
     {
@@ -165,9 +159,10 @@ class Tempnam extends Object
     }
 
     /**
+     * Cleans unused tempnam files
      * @return void
      */
-    public function clean()
+    private function clean()
     {
         foreach (Finder::find($this->namespace.'*')->from($this->tempDir)->childFirst() as $entry) {
             $path = (string) $entry;
