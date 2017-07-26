@@ -30,7 +30,7 @@ tempnam:
 ```
 
 
-## Usage
+## Usage example
 
 ```php
 
