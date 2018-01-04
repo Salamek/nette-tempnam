@@ -5,7 +5,7 @@ namespace Salamek\Tempnam;
 use Nette\Caching\Cache;
 use Nette\Caching\IStorage;
 use Nette\DirectoryNotFoundException;
-use Nette\Object;
+use Nette\SmartObject;
 use Nette\Utils\Finder;
 use Nette\Utils\Strings;
 
@@ -13,8 +13,10 @@ use Nette\Utils\Strings;
  * Class Tempnam
  * @package Salamek\Tempnam
  */
-class Tempnam extends Object
+class Tempnam
 {
+    use SmartObject;
+
     /** @var float  probability that the clean() routine is started */
     public static $gcProbability = 0.001;
 
