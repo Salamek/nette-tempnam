@@ -45,7 +45,6 @@ class Tempnam
 
         $this->tempDir = $tempDir;
 
-        $this->namespace = $namespace;
         $this->cache = new Cache($storage, strtr(__CLASS__, ['\\' => '.']));
 
         if (mt_rand() / mt_getrandmax() < static::$gcProbability) {
