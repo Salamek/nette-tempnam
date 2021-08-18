@@ -5,6 +5,7 @@ namespace Salamek\Tempnam\DI;
 use Nette;
 use Nette\DI\Compiler;
 use Nette\DI\Configurator;
+use Salamek\Tempnam\Tempnam;
 
 /**
  * Class TempnamExtension
@@ -25,7 +26,7 @@ class TempnamExtension extends Nette\DI\CompilerExtension
         @mkdir($config['tempDir']); // @ - directory may exists
 
         $builder->addDefinition($this->prefix('tempnam'))
-            ->setClass('Salamek\Tempnam\Tempnam', [$config['tempDir']]);
+            ->setFactory(Tempnam::class, [$config['tempDir']]);
     }
 
     /**

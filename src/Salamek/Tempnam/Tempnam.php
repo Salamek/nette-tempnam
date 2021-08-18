@@ -26,7 +26,7 @@ class Tempnam
     /**
      * @var string
      */
-    private $namespace;
+    private $namespace = '_';
 
     /** @var Cache */
     private $cache;
@@ -37,7 +37,7 @@ class Tempnam
      * @param string $namespace
      * @param IStorage $storage
      */
-    public function __construct($tempDir, $namespace = '_', IStorage $storage)
+    public function __construct($tempDir, IStorage $storage)
     {
         if (!is_dir($tempDir)) {
             throw new DirectoryNotFoundException(sprintf('Directory %s not found.', $tempDir));
@@ -51,6 +51,10 @@ class Tempnam
         if (mt_rand() / mt_getrandmax() < static::$gcProbability) {
             $this->clean();
         }
+    }
+
+    public function setNamespace($namespace) {
+        $this->namespace = $namespace;
     }
 
     /**
