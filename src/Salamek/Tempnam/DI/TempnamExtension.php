@@ -16,7 +16,7 @@ class TempnamExtension extends CompilerExtension
     public function getConfigSchema(): Schema
     {
         return Expect::structure([
-            'tempDir' => Expect::string()->required()->default('%tempDir%/tempnam'),
+            'tempDir' => Expect::string()->default('%tempDir%/tempnam'),
         ]);
     }
 
