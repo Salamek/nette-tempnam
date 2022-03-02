@@ -4,6 +4,8 @@ namespace Salamek\Tempnam\DI;
 
 use Nette\DI\CompilerExtension;
 use Salamek\Tempnam\Tempnam;
+use Nette\Schema\Expect;
+use Nette\Schema\Schema;
 
 /**
  * Class TempnamExtension
