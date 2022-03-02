@@ -1,42 +1,32 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Salamek\Tempnam\DI;
 
-use Nette;
-use Nette\DI\Compiler;
-use Nette\DI\Configurator;
+use Nette\DI\CompilerExtension;
 use Salamek\Tempnam\Tempnam;
 
 /**
  * Class TempnamExtension
  * @package Salamek\Tempnam\DI
  */
-class TempnamExtension extends Nette\DI\CompilerExtension
+class TempnamExtension extends CompilerExtension
 {
-    public $defaults = [
-        'tempDir' => '%tempDir%/tempnam'
-    ];
-
-
-    public function loadConfiguration()
+    public function getConfigSchema(): Schema
     {
-        $config = $this->getConfig($this->defaults);
+        return Expect::structure([
+            'tempDir' => Expect::string()->required()->default('%tempDir%/tempnam'),
+        ]);
+    }
+
+
+    public function loadConfiguration(): void
+    {
+        $config = (array) $this->getConfig();
         $builder = $this->getContainerBuilder();
 
         @mkdir($config['tempDir']); // @ - directory may exists
 
         $builder->addDefinition($this->prefix('tempnam'))
             ->setFactory(Tempnam::class, [$config['tempDir']]);
-    }
-
-    /**
-     * @param Configurator $config
-     * @param string $extensionName
-     */
-    public static function register(Configurator $config, $extensionName = 'tempnamExtension')
-    {
-        $config->onCompile[] = function (Configurator $config, Compiler $compiler) use ($extensionName) {
-            $compiler->addExtension($extensionName, new TempnamExtension());
-        };
     }
 }
